@@ -93,7 +93,7 @@ class FH0A:
     def get_position(self, port: str):
         """
         get_position函数用于获取无人机当前位置
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :return:h,x,y
         """
         if port in self.uav_statement:
@@ -143,7 +143,7 @@ class FH0A:
     def land(self, port: int):
         """
         land函数用于控制无人机降落
-        :param port:无人机插入序号
+        :param port:无人机端口号
         """
         if not self.uav_statement[port]['is_flying']:
             return False
@@ -159,7 +159,7 @@ class FH0A:
     def takeoff(self, port: int, high: int):
         """
         takeoff函数用于控制无人机起飞
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param high:起飞高度（厘米）
         """
         if self.uav_statement[port]['is_flying']:
@@ -175,10 +175,28 @@ class FH0A:
 
     # %% TODO rewrite/review above code   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    def move(self, port: int, direct: int, distance: int):
+    def up(self, port: int, distance: int):
+        self._move(port, 1, distance)
+
+    def down(self, port: int, distance: int):
+        self._move(port, 2, distance)
+
+    def forward(self, port: int, distance: int):
+        self._move(port, 3, distance)
+
+    def back(self, port: int, distance: int):
+        self._move(port, 4, distance)
+
+    def left(self, port: int, distance: int):
+        self._move(port, 5, distance)
+
+    def right(self, port: int, distance: int):
+        self._move(port, 6, distance)
+
+    def _move(self, port: int, direct: int, distance: int):
         """
         move函数用于控制无人机移动
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param direct:移动方向（1上2下3前4后5左6右）
         :param distance:移动距离（厘米）
         """
@@ -192,7 +210,7 @@ class FH0A:
     def arrive(self, port: int, x: int, y: int, z: int):
         """
         arrive函数用于控制无人机到达指定位置
-        :param port: 无人机插入序号
+        :param port: 无人机端口号
         :param x:x轴方向位置（厘米）
         :param y:y轴方向位置（厘米）
         :param z:z轴方向位置（厘米）
@@ -207,22 +225,21 @@ class FH0A:
     def flip(self, port: int, direction: int, circle: int):
         """
         flip函数用于控制无人机翻滚
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param direction:翻滚方向（1前2后3左4右）
         :param circle:翻滚圈数（<=2）
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' flip ' + str(
-            direction) + ' ' + str(
-            circle)
+        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' flip ' \
+                  + str(direction) + ' ' + str(circle)
         self.__send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def rotate(self, port: int, degree: int):
         """
         rotate函数用于控制无人机自转
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param degree:自转方向和大小（正数顺时针，负数逆时针，单位为度数）
         """
         if not self.uav_statement[port]['is_flying']:
@@ -234,7 +251,7 @@ class FH0A:
     def speed(self, port: int, speed: int):
         """
         speed函数用于控制无人机飞行速度
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param speed:飞行速度（0-200厘米/秒）
         """
         if not self.uav_statement[port]['is_flying']:
@@ -246,7 +263,7 @@ class FH0A:
     def high(self, port: int, high: int):
         """
         high用于控制无人机飞行高度
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param high:飞行高度（厘米）
         """
         if not self.uav_statement[port]['is_flying']:
@@ -258,7 +275,7 @@ class FH0A:
     def led(self, port: int, mode: int, r: int, g: int, b: int):
         """
         led函数控制无人机灯光
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param mode:灯光模式（0常亮1呼吸灯2七彩变换）
         :param r:灯光颜色R通道
         :param g:灯光颜色G通道
@@ -274,7 +291,7 @@ class FH0A:
     def mode(self, port: int, mode: int):
         """
         mode函数用于切换飞行模式
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param mode:飞行模式（1常规2巡线3跟随4单机编队）
         """
         if not self.uav_statement[port]['is_flying']:
@@ -286,7 +303,7 @@ class FH0A:
     def visionMode(self, port: int, mode: int):
         """
         visionMode函数用于设置视觉工作模式
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param mode:视觉工作模式（1点检测2线检测3标签检测4二维码扫描5条形码扫描）
         """
         if not self.uav_statement[port]['is_flying']:
@@ -298,7 +315,7 @@ class FH0A:
     def visionColor(self, port: int, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int, mode: int = 6):
         """
         visionColor函数用于设置视觉工作模式为色块检测
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param L_L:色块L通道的最低检测值
         :param L_H:色块L通道的最高检测植
         :param A_L:色块A通道的最低检测植
@@ -318,7 +335,7 @@ class FH0A:
     def patrol_line_direction(self, port: int, direction: int):
         """
         patrol_line_direction函数用于切换无人机巡线方向
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param direction:巡线方向（1前2后3左4右）
         """
         if not self.uav_statement[port]['is_flying']:
@@ -331,7 +348,7 @@ class FH0A:
     def distinguish_label(self, port: int, id: int):
         """
         distinguish_label函数用于指定识别某个标签号
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param id:目标标签号，设置后只识别该号标签
         """
         if not self.uav_statement[port]['is_flying']:
@@ -343,7 +360,7 @@ class FH0A:
     def toward_move_label(self, port: int, direction: int, distance: int, id: int):
         """
         toward_move_label函数指定无人机移动某距离寻找某号标签
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param direction:移动方向（1上2下3前4后5左6右）
         :param distance:移动距离（厘米）
         :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
@@ -358,7 +375,7 @@ class FH0A:
     def obstacle_range(self, port: int, distance: int):
         """
         obstacle_range函数用于设置障碍物检测范围
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param distance:检测范围（厘米）
         """
         if not self.uav_statement[port]['is_flying']:
@@ -370,7 +387,7 @@ class FH0A:
     def solenoid(self, port: int, switch: int):
         """
         solenoid函数用于无人机电磁铁控制
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param switch:电磁铁控制（0关闭1打开）
         """
         if not self.uav_statement[port]['is_flying']:
@@ -382,7 +399,7 @@ class FH0A:
     def steering(self, port: int, angle: int):
         """
         steering函数用于无人机舵机控制
-        :param port:无人机插入序号
+        :param port:无人机端口号
         :param angle:舵机角度（+/-90度）
         """
         if not self.uav_statement[port]['is_flying']:
@@ -394,7 +411,7 @@ class FH0A:
     def hover(self, port: int):
         """
         hover函数用于控制无人机悬停
-        :param port: 无人机插入序号
+        :param port: 无人机端口号
         """
         if not self.uav_statement[port]['is_flying']:
             return False
