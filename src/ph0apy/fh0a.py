@@ -25,7 +25,7 @@ class FH0A:
         """
         jsSleepWithCallbackEvery(
             wait_time * 1000, 50,
-            lambda: self.__receive_msg()
+            lambda: self._receive_msg()
         )
 
     @staticmethod
@@ -55,6 +55,7 @@ class FH0A:
                         self.uav_statement[m[0]].update(st)
                     else:
                         self.uav_statement[m[0]] = st
+                    # TODO update `is_flying` state from h info
                 else:
                     # TODO cmd table
                     pass
@@ -74,7 +75,8 @@ class FH0A:
         """
         if port in self.uav_statement:
             return True
-        command = port + ' ' + str(self.tag * 2 + 1) + ' command'
+        # command = port + ' ' + str(self.tag * 2 + 1) + ' command'
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} command"
         back = self._sendCmd(command, self.tag * 2 + 1)
         # return back
         return True
@@ -86,7 +88,7 @@ class FH0A:
         :param port:飞鸿0A无人机的ip字符串为端口号，大疆TT无人机的ip字符串为ip地址
         """
         if self._connect(port):
-            y = {'x': '', 'y': '', 'h': ''}
+            y = {'x': '', 'y': '', 'h': '', 'is_flying': False}
             self.uav_statement[port] = y
             self._receive_msg()
 
@@ -110,35 +112,33 @@ class FH0A:
         for (port, state) in self.uav_statement.items():
             print("port: {0} state: {1}".format(port, state))
 
-    def __send_commond_without_return(self, command: str, cmdId: int):
+    def _send_commond_without_return(self, command: str, cmdId: int):
         self._sendCmd(str(command), cmdId)
 
-    # %% TODO rewrite/review follow code   vvvvvvvvvvvvvvvvvvvvvvvvvv
+    # def _send_commond_with_return(self, command: str, timeout: int = RESPONSE_TIMEOUT) -> str:
+    #     timestamp = time.time()
+    #     self._sendCmd(str(command))
+    #
+    #     answer = []
+    #     while 1:
+    #         answer = self.__get_state_list()
+    #         if time.time() - timestamp <= timeout:
+    #             if answer != '':
+    #                 answers = answer.split(',')
+    #                 for x in range(len(answers)):
+    #                     y1 = answers[x].split()
+    #                     y2 = command.split()
+    #                     if y1[0] == y2[0] and y1[1] == int(y2[1]) + 1 and y1[2] == 'ok':
+    #                         return 'ok'
+    #         elif time.time() - timestamp > timeout:
+    #             return 'error'
 
-    def __send_commond_with_return(self, command: str, timeout: int = RESPONSE_TIMEOUT) -> str:
-        timestamp = time.time()
-        self._sendCmd(str(command))
-
-        answer = []
-        while 1:
-            answer = self.__get_state_list()
-            if time.time() - timestamp <= timeout:
-                if answer != '':
-                    answers = answer.split(',')
-                    for x in range(len(answers)):
-                        y1 = answers[x].split()
-                        y2 = command.split()
-                        if y1[0] == y2[0] and y1[1] == int(y2[1]) + 1 and y1[2] == 'ok':
-                            return 'ok'
-            elif time.time() - timestamp > timeout:
-                return 'error'
-
-    def __get_state_list(self):
-        msgs = getBufMsgList()
-        state_msgs = ''.join(filter(lambda x: 'state' not in x, msgs))
-
-        if state_msgs != '':
-            return state_msgs
+    # def __get_state_list(self):
+    #     msgs = getBufMsgList()
+    #     state_msgs = ''.join(filter(lambda x: 'state' not in x, msgs))
+    #
+    #     if state_msgs != '':
+    #         return state_msgs
 
     def land(self, port: int):
         """
@@ -146,15 +146,19 @@ class FH0A:
         :param port:无人机端口号
         """
         if not self.uav_statement[port]['is_flying']:
-            return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' land'
-        back = self.__send_commond_with_return(command, timeout=20)
-
-        if back == 'ok':
-            self.__update_uav_statement(self.uav_statement[port]['port'], True)
             return True
-        elif back == 'error':
-            return False
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' land'
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} land"
+        back = self._send_commond_without_return(command, self.tag * 2 + 1)
+        # back = self._send_commond_with_return(command, timeout=20)
+        #
+        # if back == 'ok':
+        #     self._update_uav_statement(self.uav_statement[port]['port'], True)
+        #     return True
+        # elif back == 'error':
+        #     return False
+        self.uav_statement[port]['is_flying'] = False
+        return True
 
     def takeoff(self, port: int, high: int):
         """
@@ -163,17 +167,19 @@ class FH0A:
         :param high:起飞高度（厘米）
         """
         if self.uav_statement[port]['is_flying']:
-            return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' takeoff ' + str(high)
-        back = self.__send_commond_with_return(command, timeout=20)
-
-        if back == 'ok':
-            self.__update_uav_statement(self.uav_statement[port]['port'], True)
             return True
-        elif back == 'error':
-            return False
-
-    # %% TODO rewrite/review above code   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' takeoff ' + str(high)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} takeoff {high}"
+        back = self._send_commond_without_return(command, self.tag * 2 + 1)
+        # back = self._send_commond_with_return(command, timeout=20)
+        #
+        # if back == 'ok':
+        #     self._update_uav_statement(self.uav_statement[port]['port'], True)
+        #     return True
+        # elif back == 'error':
+        #     return False
+        self.uav_statement[port]['is_flying'] = True
+        return True
 
     def up(self, port: int, distance: int):
         self._move(port, 1, distance)
@@ -202,9 +208,10 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' move ' + str(direct) + ' ' + str(
-            distance)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' move ' + str(direct) + ' ' + str(
+        #     distance)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} move {direct} {distance}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def arrive(self, port: int, x: int, y: int, z: int):
@@ -217,9 +224,10 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' arrive ' + str(x) + ' ' + str(
-            y) + ' ' + str(z)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' arrive ' + str(x) + ' ' + str(
+        #     y) + ' ' + str(z)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} arrive {x} {y} {z}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def flip(self, port: int, direction: int, circle: int):
@@ -231,9 +239,10 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' flip ' \
-                  + str(direction) + ' ' + str(circle)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' flip ' + str(
+        #     direction) + ' ' + str(circle)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} flip {direction} {circle}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def rotate(self, port: int, degree: int):
@@ -244,8 +253,9 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' rotate ' + str(degree)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' rotate ' + str(degree)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} rotate {degree}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def speed(self, port: int, speed: int):
@@ -256,8 +266,9 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' speed ' + str(speed)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' speed ' + str(speed)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} speed {speed}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def high(self, port: int, high: int):
@@ -268,8 +279,9 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' high ' + str(high)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' high ' + str(high)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} high {high}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def led(self, port: int, mode: int, r: int, g: int, b: int):
@@ -283,9 +295,10 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' led ' + str(mode) + ' ' + str(
-            r) + ' ' + str(g) + ' ' + str(b)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' led ' + str(mode) + ' ' + str(
+        #     r) + ' ' + str(g) + ' ' + str(b)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} led {mode} {r} {g} {b}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def mode(self, port: int, mode: int):
@@ -296,8 +309,9 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' mode ' + str(mode)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' mode ' + str(mode)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} mode {mode}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def visionMode(self, port: int, mode: int):
@@ -308,8 +322,9 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' visionMode ' + str(mode)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' visionMode ' + str(mode)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} visionMode {mode}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def visionColor(self, port: int, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int, mode: int = 6):
@@ -326,10 +341,11 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + \
-                  ' visionColor ' + str(mode) + ' ' + str(L_L) + ' ' + str(L_H) + ' ' + \
-                  str(A_L) + ' ' + str(A_H) + ' ' + str(B_L) + ' ' + str(B_H)
-        self.__send_commond_without_return(command)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + \
+        #           ' visionColor ' + str(mode) + ' ' + str(L_L) + ' ' + str(L_H) + ' ' + \
+        #           str(A_L) + ' ' + str(A_H) + ' ' + str(B_L) + ' ' + str(B_H)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} visionColor {mode} {L_L} {L_H} {A_L} {A_H} {B_L} {B_H}"
+        self._send_commond_without_return(command)
         return True
 
     def patrol_line_direction(self, port: int, direction: int):
@@ -340,9 +356,10 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' patrol_line_direction ' + str(
-            direction)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' patrol_line_direction ' + str(
+        #     direction)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} patrol_line_direction {direction}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def distinguish_label(self, port: int, id: int):
@@ -353,8 +370,9 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' distiniguish_label ' + str(id)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' distiniguish_label ' + str(id)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} distiniguish_label {id}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def toward_move_label(self, port: int, direction: int, distance: int, id: int):
@@ -367,9 +385,10 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' toward_move_label ' + str(
-            direction) + ' ' + str(distance) + ' ' + str(id)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' toward_move_label ' + str(
+        #     direction) + ' ' + str(distance) + ' ' + str(id)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} toward_move_label {direction} {distance} {id}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def obstacle_range(self, port: int, distance: int):
@@ -380,8 +399,9 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' obstacle_range ' + str(distance)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' obstacle_range ' + str(distance)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} obstacle_range {distance}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def solenoid(self, port: int, switch: int):
@@ -392,8 +412,9 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' solenoid ' + str(switch)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' solenoid ' + str(switch)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} solenoid {switch}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def steering(self, port: int, angle: int):
@@ -404,8 +425,9 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' steering ' + str(angle)
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' steering ' + str(angle)
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} steering {angle}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def hover(self, port: int):
@@ -415,11 +437,11 @@ class FH0A:
         """
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' hover'
-        self.__send_commond_without_return(command, self.tag * 2 + 1)
+        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' hover'
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} hover"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    # %% TODO rewrite/review follow code
     def end(self):
         """
         end函数用于降落所有编队无人机
