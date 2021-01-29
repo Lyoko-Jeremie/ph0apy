@@ -4,7 +4,7 @@ from js import sendCmd
 from js import getBufMsgList
 from js import jsSleepWithCallbackEvery
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from functools import reduce
 
 
@@ -12,10 +12,10 @@ class FH0A:
     COUNT: int = 1
     RESPONSE_TIMEOUT: int = 10
     uav_statement: Dict[str, Dict[str, Any]] = {}
-    cmd_table: Dict[int, str] = {}
+    cmd_table: Dict[int, Tuple[str, str | None]] = {}
 
     def __init__(self,
-                 response_timeout=RESPONSE_TIMEOUT):
+                 response_timeout = RESPONSE_TIMEOUT):
         self.response_timeout = response_timeout
 
     def sleep(self, wait_time: int):
@@ -55,16 +55,19 @@ class FH0A:
                         self.uav_statement[m[0]].update(st)
                     else:
                         self.uav_statement[m[0]] = st
-                    # TODO update `is_flying` state from h info
-                else:
-                    # TODO cmd table
+                    # TODO update `is_flying` state from h/lock_flag info
+                elif m[1] != '0':
+                    # cmd table
+                    cId = int(m[1]) - 1
+                    if cId in self.cmd_table:
+                        self.cmd_table[cId][1] = msg
                     pass
             pass
 
     def _sendCmd(self, command: str, cmdId: int):
         self.tag = self.tag + 1
-        # TODO cmd table
-        self.cmd_table[cmdId] = command
+        # cmd table
+        self.cmd_table[cmdId] = tuple(command, None)
         return sendCmd(command)
 
     def _connect(self, port: str) -> bool:
@@ -104,6 +107,17 @@ class FH0A:
         h = x = y = ''
         return h, x, y
 
+    def get_state(self, port: str):
+        """
+        get_position函数用于获取无人机当前位置
+        :param port:无人机端口号
+        :return:h,x,y
+        """
+        if port in self.uav_statement:
+            st = self.uav_statement[port]
+            return st
+        return None
+
     def show_uav_list(self):
         """
         show_uav_list函数用于查看所有无人机
@@ -115,30 +129,21 @@ class FH0A:
     def _send_commond_without_return(self, command: str, cmdId: int):
         self._sendCmd(str(command), cmdId)
 
-    # def _send_commond_with_return(self, command: str, timeout: int = RESPONSE_TIMEOUT) -> str:
-    #     timestamp = time.time()
-    #     self._sendCmd(str(command))
-    #
-    #     answer = []
-    #     while 1:
-    #         answer = self.__get_state_list()
-    #         if time.time() - timestamp <= timeout:
-    #             if answer != '':
-    #                 answers = answer.split(',')
-    #                 for x in range(len(answers)):
-    #                     y1 = answers[x].split()
-    #                     y2 = command.split()
-    #                     if y1[0] == y2[0] and y1[1] == int(y2[1]) + 1 and y1[2] == 'ok':
-    #                         return 'ok'
-    #         elif time.time() - timestamp > timeout:
-    #             return 'error'
+    def _send_commond_with_return(self, command: str, cmdId: int, timeout: int = RESPONSE_TIMEOUT) -> str:
+        self._sendCmd(str(command), cmdId)
+        timestamp = time.time()
 
-    # def __get_state_list(self):
-    #     msgs = getBufMsgList()
-    #     state_msgs = ''.join(filter(lambda x: 'state' not in x, msgs))
-    #
-    #     if state_msgs != '':
-    #         return state_msgs
+        while 1:
+            jsSleepWithCallbackEvery(
+                200, 20,
+                lambda: self._receive_msg()
+            )
+            if time.time() - timestamp > timeout:
+                return None
+            if self.cmd_table[cmdId][1] != None:
+                continue
+            else:
+                return self.cmd_table[cmdId][1]
 
     def land(self, port: int):
         """
@@ -149,14 +154,9 @@ class FH0A:
             return True
         # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' land'
         command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} land"
-        back = self._send_commond_without_return(command, self.tag * 2 + 1)
-        # back = self._send_commond_with_return(command, timeout=20)
-        #
-        # if back == 'ok':
-        #     self._update_uav_statement(self.uav_statement[port]['port'], True)
-        #     return True
-        # elif back == 'error':
-        #     return False
+        # back = self._send_commond_without_return(command, self.tag * 2 + 1)
+        back = self._send_commond_with_return(command, timeout = 20)
+
         self.uav_statement[port]['is_flying'] = False
         return True
 
@@ -170,14 +170,9 @@ class FH0A:
             return True
         # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' takeoff ' + str(high)
         command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} takeoff {high}"
-        back = self._send_commond_without_return(command, self.tag * 2 + 1)
-        # back = self._send_commond_with_return(command, timeout=20)
-        #
-        # if back == 'ok':
-        #     self._update_uav_statement(self.uav_statement[port]['port'], True)
-        #     return True
-        # elif back == 'error':
-        #     return False
+        # back = self._send_commond_without_return(command, self.tag * 2 + 1)
+        back = self._send_commond_with_return(command, timeout = 20)
+
         self.uav_statement[port]['is_flying'] = True
         return True
 
