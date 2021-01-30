@@ -18,4 +18,5 @@ setuptools.setup(
   python_requires = '>=3.6',
 )
 
+# pip install wheel
 # python setup.py bdist_wheel
