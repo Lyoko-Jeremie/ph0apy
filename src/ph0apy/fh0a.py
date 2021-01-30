@@ -4,7 +4,7 @@ from js import sendCmd
 from js import getBufMsgList
 from js import jsSleepWithCallbackEvery
 
-from typing import List, Dict, Any, Tuple, Union
+from typing import List, Dict, Any, Tuple, Union, Literal
 from functools import reduce
 
 
@@ -13,12 +13,13 @@ class FH0A:
     RESPONSE_TIMEOUT: int = 10
     uav_statement: Dict[str, Dict[str, Any]] = {}
     cmd_table: Dict[int, Tuple[str, Union[str, None]]] = {}
+    tag: int = 1
 
     def __init__(self,
                  response_timeout = RESPONSE_TIMEOUT):
         self.response_timeout = response_timeout
 
-    def sleep(self, wait_time: int):
+    def sleep(self, wait_time: int) -> None:
         """
         wait函数用于等待
         :param wait_time:等待时间，单位为秒
@@ -29,13 +30,13 @@ class FH0A:
         )
 
     @staticmethod
-    def _split_state(acc: Dict, x: str):
+    def _split_state(acc: Dict, x: str) -> Dict:
         if ':' in x:
             p = x.split(':')
             acc[p[0]] = p[1]
         return acc
 
-    def _receive_msg(self):
+    def _receive_msg(self) -> None:
         """
         解析返回数据
         :return: None
@@ -46,7 +47,7 @@ class FH0A:
             if len(m) >= 3:
                 if m[1] == '0' and m[2] == 'state':
                     states: str = m[3]
-                    st = reduce(
+                    st: Dict[str, Any] = reduce(
                         self._split_state,
                         states.split(';'),
                         {}
@@ -65,10 +66,10 @@ class FH0A:
                     pass
             pass
 
-    def _sendCmd(self, command: str, cmdId: int):
+    def _sendCmd(self, command: str, cmdId: int) -> bool:
         self.tag = self.tag + 1
         # cmd table
-        self.cmd_table[cmdId] = tuple(command, None)
+        self.cmd_table[cmdId] = (command, None)
         return sendCmd(command)
 
     def _connect(self, port: str) -> bool:
@@ -86,7 +87,7 @@ class FH0A:
         return True
 
     # 飞鸿的ip字符串为端口号，TT的ip字符串为ip地址
-    def add_uav(self, port: str):
+    def add_uav(self, port: str) -> None:
         """
         input_uav函数用于添加无人机
         :param port:飞鸿0A无人机的ip字符串为端口号，大疆TT无人机的ip字符串为ip地址
@@ -96,30 +97,30 @@ class FH0A:
             self.uav_statement[port] = y
             self._receive_msg()
 
-    def get_position(self, port: str):
+    def get_position(self, port: str) -> Tuple[str, str, str]:
         """
         get_position函数用于获取无人机当前位置
         :param port:无人机端口号
         :return:h,x,y
         """
         if port in self.uav_statement:
-            st = self.uav_statement[port]
+            st: Dict[str, Any] = self.uav_statement[port]
             return st['x'], st['y'], st['h']
         h = x = y = ''
         return h, x, y
 
-    def get_state(self, port: str):
+    def get_state(self, port: str) -> Union[Dict, None]:
         """
         get_position函数用于获取无人机当前位置
         :param port:无人机端口号
         :return:h,x,y
         """
         if port in self.uav_statement:
-            st = self.uav_statement[port]
+            st: Dict[str, Any] = self.uav_statement[port]
             return st
         return None
 
-    def show_uav_list(self):
+    def show_uav_list(self) -> None:
         """
         show_uav_list函数用于查看所有无人机
         :return:string
@@ -127,8 +128,8 @@ class FH0A:
         for (port, state) in self.uav_statement.items():
             print("port: {0} state: {1}".format(port, state))
 
-    def _send_commond_without_return(self, command: str, cmdId: int):
-        self._sendCmd(str(command), cmdId)
+    def _send_commond_without_return(self, command: str, cmdId: int) -> bool:
+        return self._sendCmd(str(command), cmdId)
 
     def _send_commond_with_return(self, command: str, cmdId: int, timeout: int = RESPONSE_TIMEOUT) -> Union[str, None]:
         self._sendCmd(str(command), cmdId)
@@ -146,7 +147,7 @@ class FH0A:
             else:
                 return self.cmd_table[cmdId][1]
 
-    def land(self, port: str):
+    def land(self, port: str) -> Literal[True]:
         """
         land函数用于控制无人机降落
         :param port:无人机端口号
@@ -161,7 +162,7 @@ class FH0A:
         self.uav_statement[port]['is_flying'] = False
         return True
 
-    def takeoff(self, port: str, high: int):
+    def takeoff(self, port: str, high: int) -> Literal[True]:
         """
         takeoff函数用于控制无人机起飞
         :param port:无人机端口号
@@ -177,25 +178,25 @@ class FH0A:
         self.uav_statement[port]['is_flying'] = True
         return True
 
-    def up(self, port: str, distance: int):
-        self._move(port, 1, distance)
+    def up(self, port: str, distance: int) -> bool:
+        return self._move(port, 1, distance)
 
-    def down(self, port: str, distance: int):
-        self._move(port, 2, distance)
+    def down(self, port: str, distance: int) -> bool:
+        return self._move(port, 2, distance)
 
-    def forward(self, port: str, distance: int):
-        self._move(port, 3, distance)
+    def forward(self, port: str, distance: int) -> bool:
+        return self._move(port, 3, distance)
 
-    def back(self, port: str, distance: int):
-        self._move(port, 4, distance)
+    def back(self, port: str, distance: int) -> bool:
+        return self._move(port, 4, distance)
 
-    def left(self, port: str, distance: int):
-        self._move(port, 5, distance)
+    def left(self, port: str, distance: int) -> bool:
+        return self._move(port, 5, distance)
 
-    def right(self, port: str, distance: int):
-        self._move(port, 6, distance)
+    def right(self, port: str, distance: int) -> bool:
+        return self._move(port, 6, distance)
 
-    def _move(self, port: str, direct: int, distance: int):
+    def _move(self, port: str, direct: int, distance: int) -> bool:
         """
         move函数用于控制无人机移动
         :param port:无人机端口号
@@ -210,7 +211,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def arrive(self, port: str, x: int, y: int, z: int):
+    def arrive(self, port: str, x: int, y: int, z: int) -> bool:
         """
         arrive函数用于控制无人机到达指定位置
         :param port: 无人机端口号
@@ -226,7 +227,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def flip(self, port: str, direction: int, circle: int):
+    def flip(self, port: str, direction: int, circle: int) -> bool:
         """
         flip函数用于控制无人机翻滚
         :param port:无人机端口号
@@ -241,7 +242,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def rotate(self, port: str, degree: int):
+    def rotate(self, port: str, degree: int) -> bool:
         """
         rotate函数用于控制无人机自转
         :param port:无人机端口号
@@ -254,7 +255,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def speed(self, port: str, speed: int):
+    def speed(self, port: str, speed: int) -> bool:
         """
         speed函数用于控制无人机飞行速度
         :param port:无人机端口号
@@ -267,7 +268,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def high(self, port: str, high: int):
+    def high(self, port: str, high: int) -> bool:
         """
         high用于控制无人机飞行高度
         :param port:无人机端口号
@@ -280,7 +281,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def led(self, port: str, mode: int, r: int, g: int, b: int):
+    def led(self, port: str, mode: int, r: int, g: int, b: int) -> bool:
         """
         led函数控制无人机灯光
         :param port:无人机端口号
@@ -297,7 +298,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def mode(self, port: str, mode: int):
+    def mode(self, port: str, mode: int) -> bool:
         """
         mode函数用于切换飞行模式
         :param port:无人机端口号
@@ -310,7 +311,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def visionMode(self, port: str, mode: int):
+    def visionMode(self, port: str, mode: int) -> bool:
         """
         visionMode函数用于设置视觉工作模式
         :param port:无人机端口号
@@ -323,7 +324,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def visionColor(self, port: str, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int, mode: int = 6):
+    def visionColor(self, port: str, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int, mode: int = 6) -> bool:
         """
         visionColor函数用于设置视觉工作模式为色块检测
         :param port:无人机端口号
@@ -344,7 +345,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def patrol_line_direction(self, port: str, direction: int):
+    def patrol_line_direction(self, port: str, direction: int) -> bool:
         """
         patrol_line_direction函数用于切换无人机巡线方向
         :param port:无人机端口号
@@ -358,7 +359,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def distinguish_label(self, port: str, id: int):
+    def distinguish_label(self, port: str, id: int) -> bool:
         """
         distinguish_label函数用于指定识别某个标签号
         :param port:无人机端口号
@@ -371,7 +372,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def toward_move_label(self, port: str, direction: int, distance: int, id: int):
+    def toward_move_label(self, port: str, direction: int, distance: int, id: int) -> bool:
         """
         toward_move_label函数指定无人机移动某距离寻找某号标签
         :param port:无人机端口号
@@ -387,7 +388,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def obstacle_range(self, port: str, distance: int):
+    def obstacle_range(self, port: str, distance: int) -> bool:
         """
         obstacle_range函数用于设置障碍物检测范围
         :param port:无人机端口号
@@ -400,7 +401,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def solenoid(self, port: str, switch: int):
+    def solenoid(self, port: str, switch: int) -> bool:
         """
         solenoid函数用于无人机电磁铁控制
         :param port:无人机端口号
@@ -413,7 +414,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def steering(self, port: str, angle: int):
+    def steering(self, port: str, angle: int) -> bool:
         """
         steering函数用于无人机舵机控制
         :param port:无人机端口号
@@ -426,7 +427,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def hover(self, port: str):
+    def hover(self, port: str) -> bool:
         """
         hover函数用于控制无人机悬停
         :param port: 无人机端口号
@@ -438,7 +439,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def end(self):
+    def end(self) -> None:
         """
         end函数用于降落所有编队无人机
         """

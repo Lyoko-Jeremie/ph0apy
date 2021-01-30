@@ -18,5 +18,9 @@ setuptools.setup(
   python_requires = '>=3.6',
 )
 
+# pip install mypy
+# mypy src/ph0apy/fh0a.py
+# stubgen src/ph0apy/fh0a.py
+
 # pip install wheel
 # python setup.py bdist_wheel
