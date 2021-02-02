@@ -159,7 +159,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return True
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} land"
+        command = f"{port} {self.tag * 2 + 1} land"
         back = self._send_commond_without_return(command, self.tag * 2 + 1)
         # back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
 
@@ -174,7 +174,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return True
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} emergency"
+        command = f"{port} {self.tag * 2 + 1} emergency"
         back = self._send_commond_without_return(command, self.tag * 2 + 1)
         # back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
 
@@ -190,8 +190,7 @@ class FH0A:
         self._receive_msg()
         if self.uav_statement[port]['is_flying']:
             return True
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' takeoff ' + str(high)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} takeoff {high}"
+        command = f"{port} {self.tag * 2 + 1} takeoff {high}"
         back = self._send_commond_without_return(command, self.tag * 2 + 1)
         # back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
 
@@ -207,7 +206,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} up {distance}"
+        command = f"{port} {self.tag * 2 + 1} up {distance}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -220,7 +219,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} down {distance}"
+        command = f"{port} {self.tag * 2 + 1} down {distance}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -233,7 +232,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} forward {distance}"
+        command = f"{port} {self.tag * 2 + 1} forward {distance}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -246,7 +245,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} back {distance}"
+        command = f"{port} {self.tag * 2 + 1} back {distance}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -259,7 +258,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} left {distance}"
+        command = f"{port} {self.tag * 2 + 1} left {distance}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -272,7 +271,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} right {distance}"
+        command = f"{port} {self.tag * 2 + 1} right {distance}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -286,7 +285,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} move {direct} {distance}"
+        command = f"{port} {self.tag * 2 + 1} move {direct} {distance}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -301,7 +300,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} arrive {x} {y} {h}"
+        command = f"{port} {self.tag * 2 + 1} arrive {x} {y} {h}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -314,7 +313,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} flip {direction} 1"
+        command = f"{port} {self.tag * 2 + 1} flip {direction} 1"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -327,7 +326,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} rotate {degree}"
+        command = f"{port} {self.tag * 2 + 1} rotate {degree}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -340,7 +339,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} cw {degree}"
+        command = f"{port} {self.tag * 2 + 1} cw {degree}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -353,7 +352,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} ccw {degree}"
+        command = f"{port} {self.tag * 2 + 1} ccw {degree}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -366,7 +365,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} speed {speed}"
+        command = f"{port} {self.tag * 2 + 1} speed {speed}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -379,7 +378,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} high {high}"
+        command = f"{port} {self.tag * 2 + 1} high {high}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -394,7 +393,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} led {r} {g} {b}"
+        command = f"{port} {self.tag * 2 + 1} led {r} {g} {b}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -409,7 +408,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} bln {r} {g} {b}"
+        command = f"{port} {self.tag * 2 + 1} bln {r} {g} {b}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -424,7 +423,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} rainbow {r} {g} {b}"
+        command = f"{port} {self.tag * 2 + 1} rainbow {r} {g} {b}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -437,7 +436,7 @@ class FH0A:
     #     self._receive_msg()
     #     if not self.uav_statement[port]['is_flying']:
     #         return False
-    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} mode {mode}"
+    #     command = f"{port} {self.tag * 2 + 1} mode {mode}"
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
@@ -450,7 +449,7 @@ class FH0A:
     #     self._receive_msg()
     #     if not self.uav_statement[port]['is_flying']:
     #         return False
-    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} visionMode {mode}"
+    #     command = f"{port} {self.tag * 2 + 1} visionMode {mode}"
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
@@ -468,7 +467,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} colorDetect {L_L} {L_H} {A_L} {A_H} {B_L} {B_H}"
+        command = f"{port} {self.tag * 2 + 1} colorDetect {L_L} {L_H} {A_L} {A_H} {B_L} {B_H}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -481,7 +480,7 @@ class FH0A:
     #     self._receive_msg()
     #     if not self.uav_statement[port]['is_flying']:
     #         return False
-    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} patrol_line_direction {direction}"
+    #     command = f"{port} {self.tag * 2 + 1} patrol_line_direction {direction}"
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
@@ -494,7 +493,7 @@ class FH0A:
     #     self._receive_msg()
     #     if not self.uav_statement[port]['is_flying']:
     #         return False
-    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} distiniguish_label {id}"
+    #     command = f"{port} {self.tag * 2 + 1} distiniguish_label {id}"
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
@@ -509,7 +508,7 @@ class FH0A:
     #     self._receive_msg()
     #     if not self.uav_statement[port]['is_flying']:
     #         return False
-    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} toward_move_label {direction} {distance} {id}"
+    #     command = f"{port} {self.tag * 2 + 1} toward_move_label {direction} {distance} {id}"
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
@@ -522,7 +521,7 @@ class FH0A:
     #     self._receive_msg()
     #     if not self.uav_statement[port]['is_flying']:
     #         return False
-    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} obstacle_range {distance}"
+    #     command = f"{port} {self.tag * 2 + 1} obstacle_range {distance}"
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
@@ -535,7 +534,7 @@ class FH0A:
     #     self._receive_msg()
     #     if not self.uav_statement[port]['is_flying']:
     #         return False
-    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} solenoid {switch}"
+    #     command = f"{port} {self.tag * 2 + 1} solenoid {switch}"
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
@@ -548,7 +547,7 @@ class FH0A:
     #     self._receive_msg()
     #     if not self.uav_statement[port]['is_flying']:
     #         return False
-    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} steering {angle}"
+    #     command = f"{port} {self.tag * 2 + 1} steering {angle}"
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
@@ -560,7 +559,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} hover"
+        command = f"{port} {self.tag * 2 + 1} hover"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
