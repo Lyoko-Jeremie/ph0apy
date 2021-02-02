@@ -57,7 +57,8 @@ class FH0A:
                     else:
                         self.uav_statement[m[0]] = st
                     # update `is_flying` state from h/lock_flag info
-                    self.uav_statement[m[0]]['is_flying'] = self.uav_statement[m[0]]['lock_flag']
+                    if 'lock_flag' in self.uav_statement[m[0]]:
+                        self.uav_statement[m[0]]['is_flying'] = self.uav_statement[m[0]]['lock_flag']
                 elif m[1] != '0':
                     # cmd table
                     cId = int(m[1]) - 1
