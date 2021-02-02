@@ -21,8 +21,8 @@ class FH0A:
 
     def sleep(self, wait_time: int) -> None:
         """
-        wait函数用于等待
-        :param wait_time:等待时间，单位为秒
+        wait 函数用于等待
+        :param wait_time: 等待时间，单位为秒
         """
         jsSleepWithCallbackEvery(
             wait_time * 1000, 50,
@@ -56,7 +56,8 @@ class FH0A:
                         self.uav_statement[m[0]].update(st)
                     else:
                         self.uav_statement[m[0]] = st
-                    # TODO update `is_flying` state from h/lock_flag info
+                    # update `is_flying` state from h/lock_flag info
+                    self.uav_statement[m[0]]['is_flying'] = self.uav_statement[m[0]]['lock_flag']
                 elif m[1] != '0':
                     # cmd table
                     cId = int(m[1]) - 1
@@ -81,7 +82,7 @@ class FH0A:
         if port in self.uav_statement:
             return True
         # command = port + ' ' + str(self.tag * 2 + 1) + ' command'
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} command"
+        command = f"{port} {self.tag * 2 + 1} command"
         back = self._sendCmd(command, self.tag * 2 + 1)
         # return back
         return True
@@ -100,9 +101,10 @@ class FH0A:
     def get_position(self, port: str) -> Tuple[str, str, str]:
         """
         get_position函数用于获取无人机当前位置
-        :param port:无人机端口号
+        :param port: 无人机端口号
         :return:h,x,y
         """
+        self._receive_msg()
         if port in self.uav_statement:
             st: Dict[str, Any] = self.uav_statement[port]
             return st['x'], st['y'], st['h']
@@ -112,9 +114,10 @@ class FH0A:
     def get_state(self, port: str) -> Union[Dict, None]:
         """
         get_position函数用于获取无人机当前位置
-        :param port:无人机端口号
+        :param port: 无人机端口号
         :return:h,x,y
         """
+        self._receive_msg()
         if port in self.uav_statement:
             st: Dict[str, Any] = self.uav_statement[port]
             return st
@@ -125,6 +128,7 @@ class FH0A:
         show_uav_list函数用于查看所有无人机
         :return:string
         """
+        self._receive_msg()
         for (port, state) in self.uav_statement.items():
             print("port: {0} state: {1}".format(port, state))
 
@@ -150,14 +154,29 @@ class FH0A:
     def land(self, port: str) -> Literal[True]:
         """
         land函数用于控制无人机降落
-        :param port:无人机端口号
+        :param port: 无人机端口号
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return True
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' land'
         command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} land"
-        # back = self._send_commond_without_return(command, self.tag * 2 + 1)
-        back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
+        back = self._send_commond_without_return(command, self.tag * 2 + 1)
+        # back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
+
+        self.uav_statement[port]['is_flying'] = False
+        return True
+
+    def emergency(self, port: str) -> Literal[True]:
+        """
+        emergency 函数用于控制无人机紧急降落
+        :param port: 无人机端口号
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return True
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} emergency"
+        back = self._send_commond_without_return(command, self.tag * 2 + 1)
+        # back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
 
         self.uav_statement[port]['is_flying'] = False
         return True
@@ -165,105 +184,188 @@ class FH0A:
     def takeoff(self, port: str, high: int) -> Literal[True]:
         """
         takeoff函数用于控制无人机起飞
-        :param port:无人机端口号
+        :param port: 无人机端口号
         :param high:起飞高度（厘米）
         """
+        self._receive_msg()
         if self.uav_statement[port]['is_flying']:
             return True
         # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' takeoff ' + str(high)
         command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} takeoff {high}"
-        # back = self._send_commond_without_return(command, self.tag * 2 + 1)
-        back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
+        back = self._send_commond_without_return(command, self.tag * 2 + 1)
+        # back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
 
         self.uav_statement[port]['is_flying'] = True
         return True
 
     def up(self, port: str, distance: int) -> bool:
-        return self._move(port, 1, distance)
+        """
+        up 向上移动
+        :param port: 无人机端口号
+        :param distance:移动距离（厘米）
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} up {distance}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
 
     def down(self, port: str, distance: int) -> bool:
-        return self._move(port, 2, distance)
+        """
+        down 向下移动
+        :param port: 无人机端口号
+        :param distance:移动距离（厘米）
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} down {distance}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
 
     def forward(self, port: str, distance: int) -> bool:
-        return self._move(port, 3, distance)
+        """
+        forward 向前移动
+        :param port: 无人机端口号
+        :param distance:移动距离（厘米）
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} forward {distance}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
 
     def back(self, port: str, distance: int) -> bool:
-        return self._move(port, 4, distance)
+        """
+        back 向后移动
+        :param port: 无人机端口号
+        :param distance:移动距离（厘米）
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} back {distance}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
 
     def left(self, port: str, distance: int) -> bool:
-        return self._move(port, 5, distance)
+        """
+        left 向左移动
+        :param port: 无人机端口号
+        :param distance:移动距离（厘米）
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} left {distance}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
 
     def right(self, port: str, distance: int) -> bool:
-        return self._move(port, 6, distance)
+        """
+        right 向右移动
+        :param port: 无人机端口号
+        :param distance:移动距离（厘米）
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} right {distance}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
 
     def _move(self, port: str, direct: int, distance: int) -> bool:
         """
-        move函数用于控制无人机移动
-        :param port:无人机端口号
+        move 函数用于控制无人机移动
+        :param port: 无人机端口号
         :param direct:移动方向（1上2下3前4后5左6右）
         :param distance:移动距离（厘米）
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' move ' + str(direct) + ' ' + str(
-        #     distance)
         command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} move {direct} {distance}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def arrive(self, port: str, x: int, y: int, z: int) -> bool:
+    def goto(self, port: str, x: int, y: int, h: int) -> bool:
         """
-        arrive函数用于控制无人机到达指定位置
+        goto 函数用于控制无人机到达指定位置
         :param port: 无人机端口号
-        :param x:x轴方向位置（厘米）
-        :param y:y轴方向位置（厘米）
-        :param z:z轴方向位置（厘米）
+        :param x: x轴方向位置（厘米）
+        :param y: y轴方向位置（厘米）
+        :param h: 高度（厘米）
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' arrive ' + str(x) + ' ' + str(
-        #     y) + ' ' + str(z)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} arrive {x} {y} {z}"
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} arrive {x} {y} {h}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def flip(self, port: str, direction: int, circle: int) -> bool:
+    def flip(self, port: str, direction: str) -> bool:
         """
         flip函数用于控制无人机翻滚
-        :param port:无人机端口号
-        :param direction:翻滚方向（1前2后3左4右）
-        :param circle:翻滚圈数（<=2）
+        :param port: 无人机端口号
+        :param direction: 翻滚方向（f前 b后 l左 r右）
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' flip ' + str(
-        #     direction) + ' ' + str(circle)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} flip {direction} {circle}"
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} flip {direction} 1"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def rotate(self, port: str, degree: int) -> bool:
         """
         rotate函数用于控制无人机自转
-        :param port:无人机端口号
-        :param degree:自转方向和大小（正数顺时针，负数逆时针，单位为度数）
+        :param port: 无人机端口号
+        :param degree: 自转方向和大小（正数顺时针，负数逆时针，单位为度数）
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' rotate ' + str(degree)
         command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} rotate {degree}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
+
+    def cw(self, port: str, degree: int) -> bool:
+        """
+        cw 控制无人机顺时针自转
+        :param port: 无人机端口号
+        :param degree: 自转角度度数
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} cw {degree}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
+
+    def ccw(self, port: str, degree: int) -> bool:
+        """
+        ccw 函数用于控制无人机逆时针自转
+        :param port: 无人机端口号
+        :param degree: 自转角度度数
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} ccw {degree}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def speed(self, port: str, speed: int) -> bool:
         """
         speed函数用于控制无人机飞行速度
-        :param port:无人机端口号
-        :param speed:飞行速度（0-200厘米/秒）
+        :param port: 无人机端口号
+        :param speed: 飞行速度（0-200厘米/秒）
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' speed ' + str(speed)
         command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} speed {speed}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
@@ -271,170 +373,193 @@ class FH0A:
     def high(self, port: str, high: int) -> bool:
         """
         high用于控制无人机飞行高度
-        :param port:无人机端口号
-        :param high:飞行高度（厘米）
+        :param port: 无人机端口号
+        :param high: 飞行高度（厘米）
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' high ' + str(high)
         command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} high {high}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def led(self, port: str, mode: int, r: int, g: int, b: int) -> bool:
+    def led(self, port: str, r: int, g: int, b: int) -> bool:
         """
         led函数控制无人机灯光
-        :param port:无人机端口号
-        :param mode:灯光模式（0常亮1呼吸灯2七彩变换）
-        :param r:灯光颜色R通道
-        :param g:灯光颜色G通道
-        :param b:灯光颜色B通道
+        :param port: 无人机端口号
+        :param r: 灯光颜色R通道
+        :param g: 灯光颜色G通道
+        :param b: 灯光颜色B通道
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' led ' + str(mode) + ' ' + str(
-        #     r) + ' ' + str(g) + ' ' + str(b)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} led {mode} {r} {g} {b}"
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} led {r} {g} {b}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def mode(self, port: str, mode: int) -> bool:
+    def bln(self, port: str, r: int, g: int, b: int) -> bool:
         """
-        mode函数用于切换飞行模式
-        :param port:无人机端口号
-        :param mode:飞行模式（1常规2巡线3跟随4单机编队）
+        led函数控制无人机灯光
+        :param port: 无人机端口号
+        :param r: 灯光颜色R通道
+        :param g: 灯光颜色G通道
+        :param b: 灯光颜色B通道
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' mode ' + str(mode)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} mode {mode}"
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} bln {r} {g} {b}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def visionMode(self, port: str, mode: int) -> bool:
+    def rainbow(self, port: str, r: int, g: int, b: int) -> bool:
         """
-        visionMode函数用于设置视觉工作模式
-        :param port:无人机端口号
-        :param mode:视觉工作模式（1点检测2线检测3标签检测4二维码扫描5条形码扫描）
+        led函数控制无人机灯光
+        :param port: 无人机端口号
+        :param r: 灯光颜色R通道
+        :param g: 灯光颜色G通道
+        :param b: 灯光颜色B通道
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' visionMode ' + str(mode)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} visionMode {mode}"
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} rainbow {r} {g} {b}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def visionColor(self, port: str, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int, mode: int = 6) -> bool:
+    # def _mode(self, port: str, mode: int) -> bool:
+    #     """
+    #     mode函数用于切换飞行模式
+    #     :param port: 无人机端口号
+    #     :param mode:飞行模式（1常规2巡线3跟随4单机编队）
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} mode {mode}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
+
+    # def _visionMode(self, port: str, mode: int) -> bool:
+    #     """
+    #     visionMode函数用于设置视觉工作模式
+    #     :param port: 无人机端口号
+    #     :param mode:视觉工作模式（1点检测2线检测3标签检测4二维码扫描5条形码扫描）
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} visionMode {mode}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
+
+    def visionColor(self, port: str, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int) -> bool:
         """
         visionColor函数用于设置视觉工作模式为色块检测
-        :param port:无人机端口号
-        :param L_L:色块L通道的最低检测值
-        :param L_H:色块L通道的最高检测植
-        :param A_L:色块A通道的最低检测植
-        :param A_H:色块A通道的最高检测值
-        :param B_L:色块B通道的最低检测植
-        :param B_H:色块B通道的最高检测植
-        :param mode:mode=6
+        :param port: 无人机端口号
+        :param L_L: 色块L通道的最低检测值
+        :param L_H: 色块L通道的最高检测植
+        :param A_L: 色块A通道的最低检测植
+        :param A_H: 色块A通道的最高检测值
+        :param B_L: 色块B通道的最低检测植
+        :param B_H: 色块B通道的最高检测植z
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + \
-        #           ' visionColor ' + str(mode) + ' ' + str(L_L) + ' ' + str(L_H) + ' ' + \
-        #           str(A_L) + ' ' + str(A_H) + ' ' + str(B_L) + ' ' + str(B_H)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} visionColor {mode} {L_L} {L_H} {A_L} {A_H} {B_L} {B_H}"
+        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} colorDetect {L_L} {L_H} {A_L} {A_H} {B_L} {B_H}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def patrol_line_direction(self, port: str, direction: int) -> bool:
-        """
-        patrol_line_direction函数用于切换无人机巡线方向
-        :param port:无人机端口号
-        :param direction:巡线方向（1前2后3左4右）
-        """
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' patrol_line_direction ' + str(
-        #     direction)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} patrol_line_direction {direction}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
+    # def patrol_line_direction(self, port: str, direction: int) -> bool:
+    #     """
+    #     patrol_line_direction函数用于切换无人机巡线方向
+    #     :param port: 无人机端口号
+    #     :param direction:巡线方向（1前2后3左4右）
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} patrol_line_direction {direction}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
 
-    def distinguish_label(self, port: str, id: int) -> bool:
-        """
-        distinguish_label函数用于指定识别某个标签号
-        :param port:无人机端口号
-        :param id:目标标签号，设置后只识别该号标签
-        """
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' distiniguish_label ' + str(id)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} distiniguish_label {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
+    # def distinguish_label(self, port: str, id: int) -> bool:
+    #     """
+    #     distinguish_label函数用于指定识别某个标签号
+    #     :param port: 无人机端口号
+    #     :param id:目标标签号，设置后只识别该号标签
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} distiniguish_label {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
 
-    def toward_move_label(self, port: str, direction: int, distance: int, id: int) -> bool:
-        """
-        toward_move_label函数指定无人机移动某距离寻找某号标签
-        :param port:无人机端口号
-        :param direction:移动方向（1上2下3前4后5左6右）
-        :param distance:移动距离（厘米）
-        :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
-        """
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' toward_move_label ' + str(
-        #     direction) + ' ' + str(distance) + ' ' + str(id)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} toward_move_label {direction} {distance} {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
+    # def toward_move_label(self, port: str, direction: int, distance: int, id: int) -> bool:
+    #     """
+    #     toward_move_label函数指定无人机移动某距离寻找某号标签
+    #     :param port: 无人机端口号
+    #     :param direction:移动方向（1上2下3前4后5左6右）
+    #     :param distance:移动距离（厘米）
+    #     :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} toward_move_label {direction} {distance} {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
 
-    def obstacle_range(self, port: str, distance: int) -> bool:
-        """
-        obstacle_range函数用于设置障碍物检测范围
-        :param port:无人机端口号
-        :param distance:检测范围（厘米）
-        """
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' obstacle_range ' + str(distance)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} obstacle_range {distance}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
+    # def obstacle_range(self, port: str, distance: int) -> bool:
+    #     """
+    #     obstacle_range函数用于设置障碍物检测范围
+    #     :param port: 无人机端口号
+    #     :param distance:检测范围（厘米）
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} obstacle_range {distance}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
 
-    def solenoid(self, port: str, switch: int) -> bool:
-        """
-        solenoid函数用于无人机电磁铁控制
-        :param port:无人机端口号
-        :param switch:电磁铁控制（0关闭1打开）
-        """
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' solenoid ' + str(switch)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} solenoid {switch}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
+    # def solenoid(self, port: str, switch: int) -> bool:
+    #     """
+    #     solenoid函数用于无人机电磁铁控制
+    #     :param port: 无人机端口号
+    #     :param switch:电磁铁控制（0关闭1打开）
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} solenoid {switch}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
 
-    def steering(self, port: str, angle: int) -> bool:
-        """
-        steering函数用于无人机舵机控制
-        :param port:无人机端口号
-        :param angle:舵机角度（+/-90度）
-        """
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' steering ' + str(angle)
-        command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} steering {angle}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
+    # def steering(self, port: str, angle: int) -> bool:
+    #     """
+    #     steering函数用于无人机舵机控制
+    #     :param port: 无人机端口号
+    #     :param angle:舵机角度（+/-90度）
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} steering {angle}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
 
-    def hover(self, port: str) -> bool:
+    def stopMove(self, port: str) -> bool:
         """
-        hover函数用于控制无人机悬停
+        stopMove 函数用于控制无人机悬停
         :param port: 无人机端口号
         """
+        self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        # command = self.uav_statement[port]['port'] + ' ' + str(self.tag * 2 + 1) + ' hover'
         command = f"{self.uav_statement[port]['port']} {self.tag * 2 + 1} hover"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
