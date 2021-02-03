@@ -64,19 +64,26 @@ class FH0A:
         解析返回数据
         :return: None
         """
-        msgs: List[str] = getBufMsgList()
+        msgs: List[str] = getBufMsgList().split('\n')
+        # print('_receive_msg')
+        # print(type(msgs))
+        # if len(msgs) > 0:
+        #     print(msgs)
         for msg in msgs:
             m: List[str] = msg.split(' ')
+            # print(len(m))
             if len(m) >= 3:
                 if m[1] == '0' and m[2] == 'status':
                     states: str = m[3]
-                    print(states.split(';'))
+                    # print('states.split()')
+                    # print(states.split(';'))
                     st: Dict[str, Any] = reduce(
                         self._split_state,
                         states.split(';'),
                         {}
                     )
-                    print(st)
+                    # print('st')
+                    # print(st)
                     if m[0] in self.uav_statement:
                         self.uav_statement[m[0]].update(st)
                     else:

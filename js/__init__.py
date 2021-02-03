@@ -58,14 +58,14 @@ def sendCmd(text: str):
   pass
 
 
-def getBufMsgList() -> typing.List[str]:
+def getBufMsgList() -> str:
   global rr
   l = msgs.copy()
   if len(rr) > 0:
     l.extend(rr)
     rr = []
     l.extend(msgs.copy())
-  return l
+  return '\n'.join(l)
   pass
 
 
