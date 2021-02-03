@@ -94,8 +94,8 @@ class FH0A:
         :param port:飞鸿0A无人机为端口号 COM3 ，大疆TT无人机为ip地址
         :return:连接状态是否成功，是则返回True,否则返回False
         """
-        if port in self.uav_statement:
-            return True
+        # if port in self.uav_statement:
+        #     return True
         # command = port + ' ' + str(self.tag * 2 + 1) + ' command'
         command = f"{port} {self.tag * 2 + 1} command"
         back = self._sendCmd(command, self.tag * 2 + 1)
