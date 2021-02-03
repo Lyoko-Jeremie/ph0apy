@@ -2,6 +2,7 @@
 import time
 from dataclasses import dataclass
 
+from js import printString
 from js import sendCmd
 from js import getBufMsgList
 from js import jsSleepWithCallbackEvery
@@ -38,13 +39,21 @@ class FH0A:
         wait 函数用于等待
         :param wait_time: 等待时间，单位为秒
         """
-        jsSleepWithCallbackEvery(
-            wait_time * 1000, 50,
-            lambda: self._receive_msg()
-        )
+        # jsSleepWithCallbackEvery(
+        #     wait_time * 1000, 50,
+        #     lambda: self._receive_msg()
+        # )
+        startTime = time.time() * 1000
+        endTime = time.time() * 1000
+        last = 0
+        while endTime - startTime < wait_time * 1000:
+            if (endTime - startTime) > (last * 50):
+                self._receive_msg()
+                last = last + 1
+            endTime = time.time() * 1000
+        pass
 
-    @staticmethod
-    def _split_state(acc: Dict, x: str) -> Dict:
+    def _split_state(self, acc: Dict, x: str) -> Dict:
         if ':' in x:
             p = x.split(':')
             acc[p[0]] = p[1]
@@ -59,13 +68,15 @@ class FH0A:
         for msg in msgs:
             m: List[str] = msg.split(' ')
             if len(m) >= 3:
-                if m[1] == '0' and m[2] == 'state':
+                if m[1] == '0' and m[2] == 'status':
                     states: str = m[3]
+                    print(states.split(';'))
                     st: Dict[str, Any] = reduce(
                         self._split_state,
                         states.split(';'),
                         {}
                     )
+                    print(st)
                     if m[0] in self.uav_statement:
                         self.uav_statement[m[0]].update(st)
                     else:
