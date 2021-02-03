@@ -315,7 +315,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{port} {self.tag * 2 + 1} arrive {x} {y} {h}"
+        command = f"{port} {self.tag * 2 + 1} goto {x} {y} {h}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -468,7 +468,7 @@ class FH0A:
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
-    def visionColor(self, port: str, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int) -> bool:
+    def colorDetect(self, port: str, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int) -> bool:
         """
         visionColor函数用于设置视觉工作模式为色块检测
         :param port: 无人机端口号
@@ -483,6 +483,24 @@ class FH0A:
         if not self.uav_statement[port]['is_flying']:
             return False
         command = f"{port} {self.tag * 2 + 1} colorDetect {L_L} {L_H} {A_L} {A_H} {B_L} {B_H}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
+
+    def colorDetectLabel(self, port: str, label: str) -> bool:
+        """
+        visionColor函数用于设置视觉工作模式为色块检测
+        :param port: 无人机端口号
+        :param L_L: 色块L通道的最低检测值
+        :param L_H: 色块L通道的最高检测植
+        :param A_L: 色块A通道的最低检测植
+        :param A_H: 色块A通道的最高检测值
+        :param B_L: 色块B通道的最低检测植
+        :param B_H: 色块B通道的最高检测植z
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{port} {self.tag * 2 + 1} colorDetectLabel {label}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
