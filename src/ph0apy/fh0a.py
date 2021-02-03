@@ -88,7 +88,7 @@ class FH0A:
         self.cmd_table[cmdId] = (command, None)
         return sendCmd(command)
 
-    def _connect(self, port: str) -> bool:
+    def _open(self, port: str) -> bool:
         """
         command函数用于连接无人机
         :param port:飞鸿0A无人机为端口号 COM3 ，大疆TT无人机为ip地址
@@ -97,7 +97,7 @@ class FH0A:
         # if port in self.uav_statement:
         #     return True
         # command = port + ' ' + str(self.tag * 2 + 1) + ' command'
-        command = f"{port} {self.tag * 2 + 1} command"
+        command = f"{port} {self.tag * 2 + 1} open"
         back = self._sendCmd(command, self.tag * 2 + 1)
         # return back
         return True
@@ -108,7 +108,7 @@ class FH0A:
         input_uav函数用于添加无人机
         :param port:飞鸿0A无人机的ip字符串为端口号，大疆TT无人机的ip字符串为ip地址
         """
-        if self._connect(port):
+        if self._open(port):
             y = {'x': '', 'y': '', 'h': '', 'is_flying': False}
             self.uav_statement[port] = y
             self._receive_msg()
