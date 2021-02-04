@@ -389,7 +389,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{port} {self.tag * 2 + 1} speed {speed}"
+        command = f"{port} {self.tag * 2 + 1} setSpeed {speed}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
@@ -402,7 +402,7 @@ class FH0A:
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
             return False
-        command = f"{port} {self.tag * 2 + 1} high {high}"
+        command = f"{port} {self.tag * 2 + 1} setHeight {high}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
