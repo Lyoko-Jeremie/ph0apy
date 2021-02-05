@@ -451,18 +451,18 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    # def _mode(self, port: str, mode: int) -> bool:
-    #     """
-    #     mode函数用于切换飞行模式
-    #     :param port: 无人机端口号
-    #     :param mode:飞行模式（1常规2巡线3跟随4单机编队）
-    #     """
-    #     self._receive_msg()
-    #     if not self.uav_statement[port]['is_flying']:
-    #         return False
-    #     command = f"{port} {self.tag * 2 + 1} mode {mode}"
-    #     self._send_commond_without_return(command, self.tag * 2 + 1)
-    #     return True
+    def mode(self, port: str, mode: int) -> bool:
+        """
+        mode函数用于切换飞行模式
+        :param port: 无人机端口号
+        :param mode:飞行模式（1常规2巡线3跟随4单机编队）
+        """
+        self._receive_msg()
+        if not self.uav_statement[port]['is_flying']:
+            return False
+        command = f"{port} {self.tag * 2 + 1} airplane_mode {mode}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
 
     # def _visionMode(self, port: str, mode: int) -> bool:
     #     """
