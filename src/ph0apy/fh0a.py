@@ -499,12 +499,7 @@ class FH0A:
         """
         visionColor函数用于设置视觉工作模式为色块检测
         :param port: 无人机端口号
-        :param L_L: 色块L通道的最低检测值
-        :param L_H: 色块L通道的最高检测植
-        :param A_L: 色块A通道的最低检测植
-        :param A_H: 色块A通道的最高检测值
-        :param B_L: 色块B通道的最低检测植
-        :param B_H: 色块B通道的最高检测植z
+        :param label: 预定义色彩标签名
         """
         self._receive_msg()
         if not self.uav_statement[port]['is_flying']:
