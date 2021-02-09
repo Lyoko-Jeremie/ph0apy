@@ -1,6 +1,5 @@
 # %%
 import time
-from dataclasses import dataclass
 
 from js import printString
 from js import sendCmd
@@ -11,28 +10,16 @@ from typing import List, Dict, Any, Tuple, Union, Literal
 from functools import reduce
 
 
-@dataclass()
-class LAB:
-    L_H: int
-    L_L: int
-    a_H: int
-    a_L: int
-    b_H: int
-    b_L: int
-
-
 class FH0A:
     COUNT: int = 1
     RESPONSE_TIMEOUT: int = 10
     uav_statement: Dict[str, Dict[str, Any]] = {}
     cmd_table: Dict[int, Tuple[str, Union[str, None]]] = {}
     tag: int = 1
-    label_value: Dict[str, LAB] = {}
 
     def __init__(self,
                  response_timeout = RESPONSE_TIMEOUT):
         self.response_timeout = response_timeout
-        # TODO a function init label_value from outside
 
     def sleep(self, wait_time: int) -> None:
         """
