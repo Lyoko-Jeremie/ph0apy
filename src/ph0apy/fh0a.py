@@ -18,7 +18,7 @@ class FH0A:
     tag: int = 1
 
     def __init__(self,
-                 response_timeout = RESPONSE_TIMEOUT):
+                 response_timeout=RESPONSE_TIMEOUT):
         self.response_timeout = response_timeout
 
     def sleep(self, wait_time: int) -> None:
@@ -69,6 +69,12 @@ class FH0A:
                     # update `is_flying` state from h/lock_flag info
                     if 'lock_flag' in self.uav_statement[m[0]]:
                         self.uav_statement[m[0]]['is_flying'] = self.uav_statement[m[0]]['lock_flag']
+                    if 'loc_x' in self.uav_statement[m[0]]:
+                        self.uav_statement[m[0]]['x'] = self.uav_statement[m[0]]['loc_x']
+                    if 'loc_y' in self.uav_statement[m[0]]:
+                        self.uav_statement[m[0]]['y'] = self.uav_statement[m[0]]['loc_y']
+                    if 'high' in self.uav_statement[m[0]]:
+                        self.uav_statement[m[0]]['h'] = self.uav_statement[m[0]]['high']
                 elif m[1] != '0':
                     # cmd table
                     cId = int(m[1]) - 1
@@ -133,6 +139,9 @@ class FH0A:
             st: Dict[str, Any] = self.uav_statement[port]
             return st
         return None
+
+    def is_tag_ok(self, port: str):
+        return self.uav_statement[port]['is_tag_ok']
 
     def show_uav_list(self) -> None:
         """
@@ -464,7 +473,7 @@ class FH0A:
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
-    def colorDetect(self, port: str, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int) -> bool:
+    def color_detect(self, port: str, L_L: int, L_H: int, A_L: int, A_H: int, B_L: int, B_H: int) -> bool:
         """
         visionColor函数用于设置视觉工作模式为色块检测
         :param port: 无人机端口号
@@ -482,7 +491,7 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def colorDetectLabel(self, port: str, label: str) -> bool:
+    def color_detect_label(self, port: str, label: str) -> bool:
         """
         visionColor函数用于设置视觉工作模式为色块检测
         :param port: 无人机端口号
@@ -575,7 +584,10 @@ class FH0A:
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
-    def stopMove(self, port: str) -> bool:
+    def stop(self, port: str) -> bool:
+        return self.hover(port)
+
+    def hover(self, port: str) -> bool:
         """
         stopMove 函数用于控制无人机悬停
         :param port: 无人机端口号
