@@ -88,6 +88,7 @@ class FH0A:
         self.tag = self.tag + 1
         # cmd table
         self.cmd_table[cmdId] = (command, None)
+        self._receive_msg()
         return sendCmd(command)
 
     def _open(self, port: str) -> bool:
