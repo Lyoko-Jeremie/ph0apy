@@ -94,7 +94,7 @@ class FH0A:
     def _open(self, port: str) -> bool:
         """
         command函数用于连接无人机
-        :param port:飞鸿0A无人机为端口号 COM3 ，大疆TT无人机为ip地址
+        :param port:飞鸿0A无人机为端口号 COM3 ，TT无人机为ip地址
         :return:连接状态是否成功，是则返回True,否则返回False
         """
         # if port in self.uav_statement:
@@ -109,7 +109,7 @@ class FH0A:
     def add_uav(self, port: str) -> None:
         """
         input_uav函数用于添加无人机
-        :param port:飞鸿0A无人机的ip字符串为端口号，大疆TT无人机的ip字符串为ip地址
+        :param port:飞鸿0A无人机的ip字符串为端口号，TT无人机的ip字符串为ip地址
         """
         if self._open(port):
             y = {'x': '', 'y': '', 'h': '', 'is_flying': False}
@@ -593,7 +593,7 @@ class FH0A:
 
     def hover(self, port: str) -> bool:
         """
-        stopMove 函数用于控制无人机悬停
+        hover 函数用于控制无人机悬停
         :param port: 无人机端口号
         """
         self._receive_msg()
