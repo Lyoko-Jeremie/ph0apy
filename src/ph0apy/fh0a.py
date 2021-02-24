@@ -144,6 +144,9 @@ class FH0A:
     def is_tag_ok(self, port: str):
         return self.uav_statement[port]['is_tag_ok']
 
+    def is_dot_ok(self, port: str):
+        return self.uav_statement[port]['is_dot_ok']
+
     def show_uav_list(self) -> None:
         """
         show_uav_list函数用于查看所有无人机
