@@ -142,9 +142,19 @@ class FH0A:
         return None
 
     def is_tag_ok(self, port: str):
+        """
+        is_dot_ok 函数用于检查无人机当前是否已经检测到指定二维码
+        :param port: 无人机端口号
+        :return: "0" or "1"
+        """
         return self.uav_statement[port]['is_tag_ok']
 
     def is_dot_ok(self, port: str):
+        """
+        is_dot_ok 函数用于检查无人机当前是否已经检测到指定颜色色块 或 已经检测到交点
+        :param port: 无人机端口号
+        :return: "0" or "1"
+        """
         return self.uav_statement[port]['is_dot_ok']
 
     def show_uav_list(self) -> None:
