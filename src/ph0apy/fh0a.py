@@ -191,8 +191,8 @@ class FH0A:
         :param port: 无人机端口号
         """
         self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return True
+        # if not self.uav_statement[port]['is_flying']:
+        #     return True
         command = f"{port} {self.tag * 2 + 1} land"
         back = self._send_commond_without_return(command, self.tag * 2 + 1)
         # back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
@@ -206,8 +206,8 @@ class FH0A:
         :param port: 无人机端口号
         """
         self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return True
+        # if not self.uav_statement[port]['is_flying']:
+        #     return True
         command = f"{port} {self.tag * 2 + 1} emergency"
         back = self._send_commond_without_return(command, self.tag * 2 + 1)
         # back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
@@ -222,8 +222,8 @@ class FH0A:
         :param high:起飞高度（厘米）
         """
         self._receive_msg()
-        if self.uav_statement[port]['is_flying']:
-            return True
+        # if self.uav_statement[port]['is_flying']:
+        #     return True
         command = f"{port} {self.tag * 2 + 1} takeoff {high}"
         back = self._send_commond_without_return(command, self.tag * 2 + 1)
         # back = self._send_commond_with_return(command, self.tag * 2 + 1, timeout = 20)
@@ -397,8 +397,8 @@ class FH0A:
         :param speed: 飞行速度（0-200厘米/秒）
         """
         self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
+        # if not self.uav_statement[port]['is_flying']:
+        #     return False
         command = f"{port} {self.tag * 2 + 1} setSpeed {speed}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
@@ -425,8 +425,8 @@ class FH0A:
         :param b: 灯光颜色B通道
         """
         self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
+        # if not self.uav_statement[port]['is_flying']:
+        #     return False
         command = f"{port} {self.tag * 2 + 1} light {r} {g} {b}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
@@ -440,8 +440,8 @@ class FH0A:
         :param b: 灯光颜色B通道
         """
         self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
+        # if not self.uav_statement[port]['is_flying']:
+        #     return False
         command = f"{port} {self.tag * 2 + 1} bln {r} {g} {b}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
@@ -455,8 +455,8 @@ class FH0A:
         :param b: 灯光颜色B通道
         """
         self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
+        # if not self.uav_statement[port]['is_flying']:
+        #     return False
         command = f"{port} {self.tag * 2 + 1} rainbow {r} {g} {b}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
@@ -468,8 +468,8 @@ class FH0A:
         :param mode:飞行模式（1常规2巡线3跟随4单机编队）
         """
         self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
+        # if not self.uav_statement[port]['is_flying']:
+        #     return False
         command = f"{port} {self.tag * 2 + 1} airplane_mode {mode}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
@@ -499,8 +499,8 @@ class FH0A:
         :param B_H: 色块B通道的最高检测植z
         """
         self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
+        # if not self.uav_statement[port]['is_flying']:
+        #     return False
         command = f"{port} {self.tag * 2 + 1} colorDetect {L_L} {L_H} {A_L} {A_H} {B_L} {B_H}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
@@ -512,8 +512,8 @@ class FH0A:
         :param label: 预定义色彩标签名
         """
         self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
+        # if not self.uav_statement[port]['is_flying']:
+        #     return False
         command = f"{port} {self.tag * 2 + 1} colorDetectLabel {label}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
