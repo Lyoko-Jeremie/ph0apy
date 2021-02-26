@@ -613,13 +613,21 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
-    def end(self) -> None:
-        """
-        end函数用于降落所有编队无人机
-        """
-        for (port, uav) in self.uav_statement.items():
-            if uav['is_flying']:
-                self.land(port)
+    # def end(self) -> None:
+    #     """
+    #     end函数用于降落所有编队无人机
+    #     """
+    #     for (port, uav) in self.uav_statement.items():
+    #         if uav['is_flying']:
+    #             self.land(port)
 
-    def __del__(self):
-        self.end()
+    def cleanup(self):
+        """
+        cleanup函数用于清理内部状态表
+        :return:
+        """
+        self.uav_statement = {}
+        self.cmd_table = {}
+
+    # def __del__(self):
+    #     self.end()
