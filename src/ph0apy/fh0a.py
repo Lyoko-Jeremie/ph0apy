@@ -622,30 +622,62 @@ class FH0A:
     #             self.land(port)
 
     def set_single_setting(self, port: str, mode: int, channel: int, address: int):
+        """
+        设置单机设置
+        :param port: 无人机端口号
+        :param mode: 0低速1中速2高速
+        :param channel: 通信信道0~125
+        :param address: 通信地址
+        :return:
+        """
         self._receive_msg()
         command = f"{port} {self.tag * 2 + 1} single_setting {mode} {channel} {address}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         pass
 
     def set_multiply_setting(self, port: str, mode: int, airplaneNumber: int, channel: int, address: int):
+        """
+        设置多机模式设置
+        :param port: 无人机端口号
+        :param mode: 0单机模式1编队模式
+        :param airplaneNumber: 飞机编号
+        :param channel: 通信信道0~125
+        :param address: 通信地址
+        :return:
+        """
         self._receive_msg()
         command = f"{port} {self.tag * 2 + 1} multiply_setting {mode} {airplaneNumber} {channel} {address}"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def read_multi_setting(self, port: str):
+        """
+        读取多机模式设置
+        :param port: 无人机端口号
+        :return:
+        """
         self._receive_msg()
         command = f"{port} {self.tag * 2 + 1} read_multi_setting"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def read_single_setting(self, port: str):
+        """
+        读取单机模式设置
+        :param port: 无人机端口号
+        :return:
+        """
         self._receive_msg()
         command = f"{port} {self.tag * 2 + 1} read_single_setting"
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
     def read_hardware_setting(self, port: str):
+        """
+        读取硬件信息
+        :param port: 无人机端口号
+        :return:
+        """
         self._receive_msg()
         command = f"{port} {self.tag * 2 + 1} read_hardware_setting"
         self._send_commond_without_return(command, self.tag * 2 + 1)
