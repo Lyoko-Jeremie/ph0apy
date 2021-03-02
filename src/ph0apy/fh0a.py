@@ -147,10 +147,7 @@ class FH0A:
         :param port: 无人机端口号
         :return: "0" or "1"
         """
-        try:
-            return self.uav_statement[port]['is_tag_ok']
-        except KeyError:
-            return '0'
+        return self.uav_statement[port].get('is_tag_ok', '0')
 
     def is_dot_ok(self, port: str):
         """
@@ -158,10 +155,7 @@ class FH0A:
         :param port: 无人机端口号
         :return: "0" or "1"
         """
-        try:
-            return self.uav_statement[port]['is_dot_ok']
-        except KeyError:
-            return '0'
+        return self.uav_statement[port].get('is_dot_ok', '0')
 
     def show_uav_list(self) -> None:
         """
