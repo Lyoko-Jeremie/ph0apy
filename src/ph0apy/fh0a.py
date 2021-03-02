@@ -633,6 +633,24 @@ class FH0A:
         self._send_commond_without_return(command, self.tag * 2 + 1)
         return True
 
+    def read_multi_setting(self, port: str):
+        self._receive_msg()
+        command = f"{port} {self.tag * 2 + 1} read_multi_setting"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
+
+    def read_single_setting(self, port: str):
+        self._receive_msg()
+        command = f"{port} {self.tag * 2 + 1} read_single_setting"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
+
+    def read_hardware_setting(self, port: str):
+        self._receive_msg()
+        command = f"{port} {self.tag * 2 + 1} read_hardware_setting"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
+
     def cleanup(self):
         """
         cleanup函数用于清理内部状态表
