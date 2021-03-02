@@ -147,7 +147,10 @@ class FH0A:
         :param port: 无人机端口号
         :return: "0" or "1"
         """
-        return self.uav_statement[port]['is_tag_ok']
+        try:
+            return self.uav_statement[port]['is_tag_ok']
+        except KeyError:
+            return '0'
 
     def is_dot_ok(self, port: str):
         """
@@ -155,7 +158,10 @@ class FH0A:
         :param port: 无人机端口号
         :return: "0" or "1"
         """
-        return self.uav_statement[port]['is_dot_ok']
+        try:
+            return self.uav_statement[port]['is_dot_ok']
+        except KeyError:
+            return '0'
 
     def show_uav_list(self) -> None:
         """
@@ -620,6 +626,18 @@ class FH0A:
     #     for (port, uav) in self.uav_statement.items():
     #         if uav['is_flying']:
     #             self.land(port)
+
+    def set_single_setting(self, port: str, mode: int, channel: int, address: int):
+        self._receive_msg()
+        command = f"{port} {self.tag * 2 + 1} single_setting {mode} {channel} {address}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        pass
+
+    def set_multiply_setting(self, port: str, mode: int, airplaneNumber: int, channel: int, address: int):
+        self._receive_msg()
+        command = f"{port} {self.tag * 2 + 1} multiply_setting {mode} {airplaneNumber} {channel} {address}"
+        self._send_commond_without_return(command, self.tag * 2 + 1)
+        return True
 
     def cleanup(self):
         """
