@@ -531,117 +531,117 @@ class FH0A:
     #     self._send_commond_without_return(command, self.tag * 2 + 1)
     #     return True
 
-    def identify_label(self, port: str, id: int) -> bool:
-        """
-        identify_label函数用于指定识别某个标签号
-        :param port: 无人机端口号
-        :param id:目标标签号，设置后只识别该号标签
-        """
-        self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        command = f"{port} {self.tag * 2 + 1} identify_label {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
-
-    def toward_move_label(self, port: str, direction: int, distance: int, id: int) -> bool:
-        """
-        toward_move_label函数指定无人机移动某距离寻找某号标签
-        :param port: 无人机端口号
-        :param direction:移动方向（1上2下3前4后5左6右）
-        :param distance:移动距离（厘米）
-        :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
-        """
-        self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        command = f"{port} {self.tag * 2 + 1} toward_move_label {direction} {distance} {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
-
-    def move_up_label(self, port: str, distance: int, id: int) -> bool:
-        """
-        move_up_label 函数指定无人机向上移动某距离寻找某号标签
-        :param port: 无人机端口号
-        :param distance:移动距离（厘米）
-        :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
-        """
-        self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        command = f"{port} {self.tag * 2 + 1} move_up_label {distance} {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
-
-    def move_down_label(self, port: str, distance: int, id: int) -> bool:
-        """
-        move_down_label 函数指定无人机向下移动某距离寻找某号标签
-        :param port: 无人机端口号
-        :param distance:移动距离（厘米）
-        :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
-        """
-        self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        command = f"{port} {self.tag * 2 + 1} move_down_label {distance} {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
-
-    def move_forward_label(self, port: str, distance: int, id: int) -> bool:
-        """
-        move_forward_label 函数指定无人机向前移动某距离寻找某号标签
-        :param port: 无人机端口号
-        :param distance:移动距离（厘米）
-        :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
-        """
-        self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        command = f"{port} {self.tag * 2 + 1} move_forward_label {distance} {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
-
-    def move_back_label(self, port: str, distance: int, id: int) -> bool:
-        """
-        move_back_label 函数指定无人机向后移动某距离寻找某号标签
-        :param port: 无人机端口号
-        :param distance:移动距离（厘米）
-        :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
-        """
-        self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        command = f"{port} {self.tag * 2 + 1} move_back_label {distance} {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
-
-    def move_left_label(self, port: str, distance: int, id: int) -> bool:
-        """
-        move_left_label 函数指定无人机向左移动某距离寻找某号标签
-        :param port: 无人机端口号
-        :param distance:移动距离（厘米）
-        :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
-        """
-        self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        command = f"{port} {self.tag * 2 + 1} move_left_label {distance} {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
-
-    def move_right_label(self, port: str, distance: int, id: int) -> bool:
-        """
-        move_right_label 函数指定无人机向右移动某距离寻找某号标签
-        :param port: 无人机端口号
-        :param distance:移动距离（厘米）
-        :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
-        """
-        self._receive_msg()
-        if not self.uav_statement[port]['is_flying']:
-            return False
-        command = f"{port} {self.tag * 2 + 1} move_right_label {distance} {id}"
-        self._send_commond_without_return(command, self.tag * 2 + 1)
-        return True
+    # def identify_label(self, port: str, id: int) -> bool:
+    #     """
+    #     identify_label函数用于指定识别某个标签号
+    #     :param port: 无人机端口号
+    #     :param id:目标标签号，设置后只识别该号标签
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{port} {self.tag * 2 + 1} identify_label {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
+    #
+    # def toward_move_label(self, port: str, direction: int, distance: int, id: int) -> bool:
+    #     """
+    #     toward_move_label函数指定无人机移动某距离寻找某号标签
+    #     :param port: 无人机端口号
+    #     :param direction:移动方向（1上2下3前4后5左6右）
+    #     :param distance:移动距离（厘米）
+    #     :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{port} {self.tag * 2 + 1} toward_move_label {direction} {distance} {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
+    #
+    # def move_up_label(self, port: str, distance: int, id: int) -> bool:
+    #     """
+    #     move_up_label 函数指定无人机向上移动某距离寻找某号标签
+    #     :param port: 无人机端口号
+    #     :param distance:移动距离（厘米）
+    #     :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{port} {self.tag * 2 + 1} move_up_label {distance} {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
+    #
+    # def move_down_label(self, port: str, distance: int, id: int) -> bool:
+    #     """
+    #     move_down_label 函数指定无人机向下移动某距离寻找某号标签
+    #     :param port: 无人机端口号
+    #     :param distance:移动距离（厘米）
+    #     :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{port} {self.tag * 2 + 1} move_down_label {distance} {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
+    #
+    # def move_forward_label(self, port: str, distance: int, id: int) -> bool:
+    #     """
+    #     move_forward_label 函数指定无人机向前移动某距离寻找某号标签
+    #     :param port: 无人机端口号
+    #     :param distance:移动距离（厘米）
+    #     :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{port} {self.tag * 2 + 1} move_forward_label {distance} {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
+    #
+    # def move_back_label(self, port: str, distance: int, id: int) -> bool:
+    #     """
+    #     move_back_label 函数指定无人机向后移动某距离寻找某号标签
+    #     :param port: 无人机端口号
+    #     :param distance:移动距离（厘米）
+    #     :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{port} {self.tag * 2 + 1} move_back_label {distance} {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
+    #
+    # def move_left_label(self, port: str, distance: int, id: int) -> bool:
+    #     """
+    #     move_left_label 函数指定无人机向左移动某距离寻找某号标签
+    #     :param port: 无人机端口号
+    #     :param distance:移动距离（厘米）
+    #     :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{port} {self.tag * 2 + 1} move_left_label {distance} {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
+    #
+    # def move_right_label(self, port: str, distance: int, id: int) -> bool:
+    #     """
+    #     move_right_label 函数指定无人机向右移动某距离寻找某号标签
+    #     :param port: 无人机端口号
+    #     :param distance:移动距离（厘米）
+    #     :param id:目标标签号，移动过程中看到该标签会自动悬停在上方
+    #     """
+    #     self._receive_msg()
+    #     if not self.uav_statement[port]['is_flying']:
+    #         return False
+    #     command = f"{port} {self.tag * 2 + 1} move_right_label {distance} {id}"
+    #     self._send_commond_without_return(command, self.tag * 2 + 1)
+    #     return True
 
     # def obstacle_range(self, port: str, distance: int) -> bool:
     #     """
